@@ -1,0 +1,28 @@
+1.So far, so good. The classification of trivial tweets makes sense except for the last one,
+2.which results in a division by zero. How can we handle that?
+3.[ 123 ]Classification II – Sentiment Analysis
+4.Accounting for unseen words and
+5.other oddities
+6.When we calculated the preceding probabilities, we actually cheated ourselves. We
+7.were not calculating the real probabilities, but only rough approximations by means of
+8.the fractions. We assumed that the training corpus would tell us the whole truth about
+9.the real probabilities. It did not. A corpus of only six tweets obviously cannot give us
+10.all the information about every tweet that has ever been written. For example, there
+11.certainly are tweets containing the word "text", it is just that we have never seen them.
+12.Apparently, our approximation is very rough, so we should account for that. This is
+13.often done in practice with "add-one smoothing".
+14.Add-one smoothing is sometimes also referred to as additive smoothing
+15.or Laplace smoothing. Note that Laplace smoothing has nothing to do
+16.with Laplacian smoothing, which is related to smoothing of polygon
+17.meshes. If we do not smooth by one but by an adjustable parameter
+18.alpha greater than zero, it is called Lidstone smoothing.
+19.It is a very simple technique, simply adding one to all counts. It has the underlying
+20.assumption that even if we have not seen a given word in the whole corpus, there is
+21.still a chance that our sample of tweets happened to not include that word. So, with
+22.add-one smoothing we pretend that we have seen every occurrence once more than
+23.we actually did. That means that instead of calculating the following:
+24.We now calculate:
+25.Why do we add 2 in the denominator? We have to make sure that the end result
+26.is again a probability. Therefore, we have to normalize the counts so that all
+27.probabilities sum up to one. As in our current dataset awesome, can occur either
+28.zero or one time, we have two cases. And indeed, we get 1 as the total probability:

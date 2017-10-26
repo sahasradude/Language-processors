@@ -1,0 +1,69 @@
+1.As we have seen when we looked at our tweet data, the tweets are not just positive
+2.or negative. The majority of tweets actually do not contain any sentiment, but
+3.are neutral or irrelevant, containing, for instance, raw information ( New book:
+4.Building Machine Learning ... http://link ). This leads to four classes. To
+5.avoid complicating the task too much, let us for now only focus on the positive and
+6.negative tweets:
+7.>>>
+8.>>>
+9.>>>
+10.>>>
+11.pos_neg_idx=np.logical_or(Y=="positive", Y=="negative")
+12.X = X[pos_neg_idx]
+13.Y = Y[pos_neg_idx]
+14.Y = Y=="positive"
+15.Now, we have in X the raw tweet texts and in Y the binary classification; we assign 0
+16.for negative and 1 for positive tweets.
+17.As we have learned in the chapters before, we can construct TfidfVectorizer
+18.to convert the raw tweet text into the TF-IDF feature values, which we then use
+19.together with the labels to train our first classifier. For convenience, we will use the
+20.Pipeline class, which allows us to join the vectorizer and the classifier together and
+21.provides the same interface:
+22.from sklearn.feature_extraction.text import TfidfVectorizer
+23.from sklearn.naive_bayes import MultinomialNB
+24.from sklearn.pipeline import Pipeline
+25.def create_ngram_model():
+26.tfidf_ngrams = TfidfVectorizer(ngram_range=(1, 3),
+27.analyzer="word", binary=False)
+28.clf = MultinomialNB()
+29.pipeline = Pipeline([('vect', tfidf_ngrams), ('clf', clf)])
+30.return pipeline
+31.The Pipeline instance returned by create_ngram_model() can now be used for
+32.fit() and predict() as if we had a normal classifier.
+33.Since we do not have that much data, we should do cross-validation. This time,
+34.however, we will not use KFold , which partitions the data in consecutive folds, but
+35.instead we use ShuffleSplit . This shuffles the data for us, but does not prevent the
+36.same data instance to be in multiple folds. For each fold, then, we keep track of the
+37.area under the Precision-Recall curve and the accuracy.
+38.[ 128 ]Chapter 6
+39.To keep our experimentation agile, let us wrap everything together in a train_
+40.model() function, which takes a function as a parameter that creates the classifier:
+41.from sklearn.metrics import precision_recall_curve, auc
+42.from sklearn.cross_validation import ShuffleSplit
+43.def train_model(clf_factory, X, Y):
+44.# setting random_state to get deterministic behavior
+45.cv = ShuffleSplit(n=len(X), n_iter=10, test_size=0.3,
+46.indices=True, random_state=0)
+47.scores = []
+48.pr_scores = []
+49.for train, test in cv:
+50.X_train, y_train = X[train], Y[train]
+51.X_test, y_test = X[test], Y[test]
+52.clf = clf_factory()
+53.clf.fit(X_train, y_train)
+54.train_score = clf.score(X_train, y_train)
+55.test_score = clf.score(X_test, y_test)
+56.scores.append(test_score)
+57.proba = clf.predict_proba(X_test)
+58.precision, recall, pr_thresholds = precision_recall_curve
+59.(y_test, proba[:,1])
+60.pr_scores.append(auc(recall, precision))
+61.summary = (np.mean(scores), np.std(scores),
+62.np.mean(pr_scores), np.std(pr_scores))
+63.print "%.3f\t%.3f\t%.3f\t%.3f"%summary
+64.>>> X, Y = load_sanders_data()
+65.>>> pos_neg_idx=np.logical_or(Y=="positive", Y=="negative")
+66.>>> X = X[pos_neg_idx]
+67.>>> Y = Y[pos_neg_idx]
+68.>>> Y = Y=="positive"
+69.>>> train_model(create_ngram_model)

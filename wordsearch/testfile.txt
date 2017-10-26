@@ -1,0 +1,28 @@
+So far, so good. The classification of trivial tweets makes sense except for the last one,
+which results in a division by zero. How can we handle that?
+[ 123 ]Classification II – Sentiment Analysis
+Accounting for unseen words and
+other oddities
+When we calculated the preceding probabilities, we actually cheated ourselves. We
+were not calculating the real probabilities, but only rough approximations by means of
+the fractions. We assumed that the training corpus would tell us the whole truth about
+the real probabilities. It did not. A corpus of only six tweets obviously cannot give us
+all the information about every tweet that has ever been written. For example, there
+certainly are tweets containing the word "text", it is just that we have never seen them.
+Apparently, our approximation is very rough, so we should account for that. This is
+often done in practice with "add-one smoothing".
+Add-one smoothing is sometimes also referred to as additive smoothing
+or Laplace smoothing. Note that Laplace smoothing has nothing to do
+with Laplacian smoothing, which is related to smoothing of polygon
+meshes. If we do not smooth by one but by an adjustable parameter
+alpha greater than zero, it is called Lidstone smoothing.
+It is a very simple technique, simply adding one to all counts. It has the underlying
+assumption that even if we have not seen a given word in the whole corpus, there is
+still a chance that our sample of tweets happened to not include that word. So, with
+add-one smoothing we pretend that we have seen every occurrence once more than
+we actually did. That means that instead of calculating the following:
+We now calculate:
+Why do we add 2 in the denominator? We have to make sure that the end result
+is again a probability. Therefore, we have to normalize the counts so that all
+probabilities sum up to one. As in our current dataset awesome, can occur either
+zero or one time, we have two cases. And indeed, we get 1 as the total probability:
